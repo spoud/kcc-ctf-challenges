@@ -23,7 +23,8 @@ jobs:
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           VERSION=${{ github.ref_name }}
           
-          docker build -t $IMAGE_ID:$VERSION . -f Dockerfile
+          ls -la
+          docker build -t $IMAGE_ID:$VERSION .
       - name: Push Image
         run: |
           # Log in to registry
