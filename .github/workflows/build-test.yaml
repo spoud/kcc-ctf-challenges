@@ -1,0 +1,42 @@
+name: Publish Container Image
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Configure your build (see README for more information)
+    env:
+      APP_NAME: kcc-ctf-challenges
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Build Container Image
+        run: |
+          IMAGE_NAME=${{ github.repository_owner }}/$APP_NAME
+          IMAGE_ID=ghcr.io/$IMAGE_NAME
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          VERSION=${{ github.ref_name }}
+          
+          mvn package -DskipTests
+          docker build -t $IMAGE_ID:$VERSION . -f Dockerfile
+      - name: Push Image
+        run: |
+          # Log in to registry
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+          docker images
+          
+          IMAGE_NAME=${{ github.repository_owner }}/$APP_NAME
+          IMAGE_ID=ghcr.io/$IMAGE_NAME
+
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          VERSION=${{ github.ref_name }}
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker push $IMAGE_ID:$VERSION
